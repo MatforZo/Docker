@@ -1,0 +1,50 @@
+# Ubuntu 22.04
+# Create a local .env file with the following 4 properties:
+#
+# MYSQL_DATABASE=<something>
+# MYSQL_USER=<something>
+# MYSQL_PASSWORD=<something>
+# MYSQL_ROOT_PASSWORD=<something>
+
+
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wordpress-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "8080:80"
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "80:80"
+    volumes:
+      - wordpress:/var/www/html
+
+volumes:
+  wordpress:
